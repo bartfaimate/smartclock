@@ -42,18 +42,5 @@ class CalendarWidget(QCalendarWidget):
             painter.drawRect(rect)
         else:
             super(CalendarWidget, self).paintCell(painter, rect, date)
-    def bak_paintCell(self, painter: PySide2.QtGui.QPainter, rect: PySide2.QtCore.QRect, date: PySide2.QtCore.QDate) -> None:
-        for event_date, summary in self.events.items():
 
-            if date == QDate(event_date):
-                painter.save()
-                painter.setPen(COLORS["EVENT"]["FONT"])
-                flags = Qt.TextSingleLine | Qt.AlignCenter
-                painter.drawText(rect, flags, str(date.day()))
-
-                # painter.setPen(COLORS["EVENT"]["BG"])
-                # painter.drawRect(rect)
-                # painter.fillRect(rect, COLORS["EVENT"]["BG"])
-                # painter.drawRect(rect)
-            else:
-                super(CalendarWidget, self).paintCell(painter, rect, date)
+    
