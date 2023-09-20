@@ -1,6 +1,5 @@
 import datetime
-import os.path
-
+import sys
 from pathlib import Path
 
 from google.auth.transport.requests import Request
@@ -14,6 +13,11 @@ SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 import datetime as dt
 
+import logging
+
+log = logging.getLogger("google-calendar")
+log.setLevel(logging.DEBUG)
+logging.basicConfig(stream=sys.stdout)
 
 def authenticate():
     creds = None
@@ -39,20 +43,25 @@ def authenticate():
     return creds
 
 
-def get_events(creds):
+def get_events(creds, max_results:int = 100, begin=None, end=None):
+    now = datetime.datetime.now()
+    begin = begin or now
+    end = end or (dt.timedelta(days=30) + begin)
+    begin = begin.isoformat() + 'Z'  # 'Z' indicates UTC time
+    end = end.isoformat() + 'Z'  # 'Z' indicates UTC time
     try:
         service = build('calendar', 'v3', credentials=creds)
 
         # Call the Calendar API
-        now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-        print('Getting the upcoming 10 events')
-        events_result = service.events().list(calendarId='primary', timeMin=now,
-                                              maxResults=10, singleEvents=True,
+        log.info(f'Getting the upcoming events between {begin} and {end}')
+        events_result = service.events().list(calendarId='primary', timeMin=begin,
+                                              timeMax=end,
+                                              maxResults=max_results, singleEvents=True,
                                               orderBy='startTime').execute()
         events = events_result.get('items', [])
 
         if not events:
-            print('No upcoming events found.')
+            log.warning('No upcoming events found.')
             return {}
 
         # Prints the start and name of the next 10 events
@@ -61,12 +70,12 @@ def get_events(creds):
             start = event['start'].get('dateTime', event['start'].get('date'))
             start = parse_time(start)
 
-            print(start, event['summary'])
+            log.info( f"{start}: {event['summary']}")
             result.update({start: event['summary']})
         return result
 
     except HttpError as error:
-        print('An error occurred: %s' % error)
+        log.error(f'An error occurred: {error}')
 
 
 def parse_time(time_string: str):
