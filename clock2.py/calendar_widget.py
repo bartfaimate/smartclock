@@ -24,6 +24,8 @@ class CalendarWidget(QCalendarWidget):
         self.setFirstDayOfWeek(Qt.DayOfWeek.Monday)
         self.google_calendar = self.init_calendar()
         super(CalendarWidget, self).clicked.connect(self.handleClicked)
+        super(CalendarWidget, self).currentPageChanged.connect(self.handleCurrentPageChanged)
+
         
 
     def init_calendar(self):
@@ -56,16 +58,22 @@ class CalendarWidget(QCalendarWidget):
             # painter.drawRect(rect)
 
     
-    def get_events_for_month(self, date:  QDate):
-        
-        
-        raise NotImplementedError
-    
-    def get_events_for_day(self, date:  QDate):
+    def get_events_for_month(self, year:int,  month: int):
+        events = self.google_calendar.get_events_for_month(year, month)
+        self.events_dates = {QDate(date) for date in events}
 
+
+
+    def get_events_for_day(self, date:  QDate):
+        date = date.toPython()
         self.google_calendar.get_event_for_day(date)
-        raise NotImplementedError
     
+    @Slot(int, int)
+    def handleCurrentPageChanged(self, year:int, month:int):
+        self.get_events_for_month( year, month)
+        
+
     @Slot(QDate)
-    def handleClicked(date: QCalendarWidget):
+    def handleClicked(self, date: QCalendarWidget):
         print(date)
+        self.get_events_for_day(date)

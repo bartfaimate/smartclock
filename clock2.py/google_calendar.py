@@ -2,7 +2,7 @@ import datetime
 import sys
 from pathlib import Path
 from typing import Union
-
+from collections import defaultdict
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -50,6 +50,12 @@ class GoogleCalendar:
         return creds
 
 
+    def get_events_for_month(self, year: int, month:int):
+        begin = datetime.datetime(year=year, month=month, day=1) - datetime.timedelta(days=5)
+        end = begin + datetime.timedelta(days=40)
+
+        return self.get_events(max_results=500, begin=begin, end=end)
+
     def get_events_this_month(self):
         begin = datetime.datetime.now() - dt.timedelta(days=30)
         end = datetime.datetime.now() + dt.timedelta(days=30)
@@ -89,19 +95,35 @@ class GoogleCalendar:
 
             # Prints the start and name of the next 10 events
             result = {}
+            result = defaultdict(list)
             for event in events:
                 start = event['start'].get('dateTime', event['start'].get('date'))
                 start = parse_time(start)
-
-                log.info( f"{start}: {event['summary']}")
-                result.update({start: event['summary']})
+                end = event['end'].get('dateTime', event['end'].get('date'))
+                end = parse_time(end)
+                for date_ in subset(start_date=start, end_date=end):
+                    log.info( f"{date_}: {event['summary']}")
+                    result[date_].append(event["summary"])
             return result
 
         except HttpError as error:
             log.error(f'An error occurred: {error}')
 
 
-def parse_time(time_expr: str) -> Union [datetime.datetime, datetime.date]:
+def subset(start_date, end_date):
+    start_date = parse_time(start_date)
+    end_date = parse_time(end_date)
+    duration = max(1, (end_date - start_date).days)
+    for i in range(duration):
+        yield start_date + datetime.timedelta(days=i)
+
+def parse_time(time_expr: str) -> datetime.datetime:
+    if not time_expr:
+        raise RuntimeError("Tiem exrpession should be provided")
+    if isinstance(time_expr, datetime.datetime):
+        return time_expr
+    if isinstance(time_expr, datetime.date):
+        return datetime.datetime(time_expr.year, time_expr.month, time_expr.day, 0, 0, 0)
     if not isinstance(time_expr, str):
         return time_expr
     try:
@@ -122,7 +144,9 @@ def main():
     calendar = GoogleCalendar()
     # calendar.get_events()
     # calendar.get_events_this_month()
-    calendar.get_event_for_day("2023-12-24")
+    # calendar.get_event_for_day("2023-10-13")
+    calendar.get_events_for_month(2023, 12)
+
 
 
 
