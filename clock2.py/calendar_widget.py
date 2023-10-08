@@ -1,10 +1,11 @@
 from PySide2.QtWidgets import QWidget, QApplication, QCalendarWidget, QHBoxLayout
-from PySide2.QtCore import  QLocale, Qt, QDate, QRect, QPoint
+from PySide2.QtCore import  QLocale, Qt, QDate, QRect, QPoint, Slot
 from  PySide2.QtGui import QColor, QBrush, QPainter
 
-from google_calendar import authenticate, get_events
+from google_calendar import GoogleCalendar
 import PySide2
 
+import datetime
 import sys
 
 COLORS = {
@@ -21,13 +22,15 @@ class CalendarWidget(QCalendarWidget):
         self.setNavigationBarVisible(True)
         self.setLocale(QLocale.English)
         self.setFirstDayOfWeek(Qt.DayOfWeek.Monday)
-        self.init_calendar()
+        self.google_calendar = self.init_calendar()
+        super(CalendarWidget, self).clicked.connect(self.handleClicked)
         
 
     def init_calendar(self):
-        creds = authenticate()
-        self.events = get_events(creds)
+        google_calendar = GoogleCalendar()
+        self.events = google_calendar.get_events_this_month()
         self.events_dates = {QDate(date) for date in self.events}
+        return google_calendar
 
     def paintCell(self, painter: QPainter, rect: QRect, date: QDate) -> None:
         super(CalendarWidget, self).paintCell(painter, rect, date)
@@ -55,8 +58,14 @@ class CalendarWidget(QCalendarWidget):
     
     def get_events_for_month(self, date:  QDate):
         
+        
         raise NotImplementedError
     
     def get_events_for_day(self, date:  QDate):
-        
+
+        self.google_calendar.get_event_for_day(date)
         raise NotImplementedError
+    
+    @Slot(QDate)
+    def handleClicked(date: QCalendarWidget):
+        print(date)

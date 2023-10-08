@@ -1,6 +1,7 @@
 import datetime
 import sys
 from pathlib import Path
+from typing import Union
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -15,86 +16,114 @@ import datetime as dt
 
 import logging
 
+
 log = logging.getLogger("google-calendar")
 log.setLevel(logging.DEBUG)
 logging.basicConfig(stream=sys.stdout)
 
-def authenticate():
-    creds = None
-    # The file credentials.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    token_file = Path(__file__).parent.joinpath('token.json').resolve()
-    credentials_file = Path(__file__).parent.joinpath('credentials.json').resolve()
+class GoogleCalendar:
 
-    if token_file.exists():
-        creds = Credentials.from_authorized_user_file(token_file.as_posix(), SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_file.as_posix(), SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with token_file.open("w") as token:
-            token.write(creds.to_json())
-    return creds
+    def __init__(self) -> None:
+        self.creds = self.authenticate()
+
+    def authenticate(self):
+        creds = None
+        # The file credentials.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        token_file = Path(__file__).parent.joinpath('token.json').resolve()
+        credentials_file = Path(__file__).parent.joinpath('credentials.json').resolve()
+
+        if token_file.exists():
+            creds = Credentials.from_authorized_user_file(token_file.as_posix(), SCOPES)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credentials_file.as_posix(), SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with token_file.open("w") as token:
+                token.write(creds.to_json())
+        return creds
 
 
-def get_events(creds, max_results:int = 100, begin=None, end=None):
-    now = datetime.datetime.now()
-    begin = begin or now
-    end = end or (dt.timedelta(days=30) + begin)
-    begin = begin.isoformat() + 'Z'  # 'Z' indicates UTC time
-    end = end.isoformat() + 'Z'  # 'Z' indicates UTC time
+    def get_events_this_month(self):
+        begin = datetime.datetime.now() - dt.timedelta(days=30)
+        end = datetime.datetime.now() + dt.timedelta(days=30)
+
+        return self.get_events(max_results=500, begin=begin, end=end)
+        
+
+    def get_event_for_day(self, date:Union[str, datetime.datetime]):
+
+        begin = parse_time(date)
+        end = begin + dt.timedelta(days=1)
+        return self.get_events( max_results=50, begin=begin, end=end)
+
+
+    def get_events(self, max_results:int = 100, begin=None, end=None):
+        if not begin or not end:
+            now = datetime.datetime.now()
+            begin = begin or now
+            end = end or (dt.timedelta(days=30) + begin)
+        begin =  begin.isoformat() + 'Z'
+        end = end.isoformat() + 'Z'
+
+        try:
+            service = build('calendar', 'v3', credentials=self.creds)
+
+            # Call the Calendar API
+            log.info(f'Getting the upcoming events between {begin} and {end}')
+            events_result = service.events().list(calendarId='primary', timeMin=begin,
+                                                timeMax=end,
+                                                maxResults=max_results, singleEvents=True,
+                                                orderBy='startTime').execute()
+            events = events_result.get('items', [])
+
+            if not events:
+                log.warning('No upcoming events found.')
+                return {}
+
+            # Prints the start and name of the next 10 events
+            result = {}
+            for event in events:
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                start = parse_time(start)
+
+                log.info( f"{start}: {event['summary']}")
+                result.update({start: event['summary']})
+            return result
+
+        except HttpError as error:
+            log.error(f'An error occurred: {error}')
+
+
+def parse_time(time_expr: str) -> Union [datetime.datetime, datetime.date]:
+    if not isinstance(time_expr, str):
+        return time_expr
     try:
-        service = build('calendar', 'v3', credentials=creds)
-
-        # Call the Calendar API
-        log.info(f'Getting the upcoming events between {begin} and {end}')
-        events_result = service.events().list(calendarId='primary', timeMin=begin,
-                                              timeMax=end,
-                                              maxResults=max_results, singleEvents=True,
-                                              orderBy='startTime').execute()
-        events = events_result.get('items', [])
-
-        if not events:
-            log.warning('No upcoming events found.')
-            return {}
-
-        # Prints the start and name of the next 10 events
-        result = {}
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            start = parse_time(start)
-
-            log.info( f"{start}: {event['summary']}")
-            result.update({start: event['summary']})
-        return result
-
-    except HttpError as error:
-        log.error(f'An error occurred: {error}')
-
-
-def parse_time(time_string: str):
-    try:
-        dt_part, tz_info = time_string.split("+")
+        dt_part, tz_info = time_expr.split("+")
         tz_info = tz_info.replace(":", "")
-        time_string = f"{dt_part}+{tz_info}"
-        time_string = dt.datetime.strptime(time_string, "%Y-%m-%dT%H:%M:%S%z")
+        time_expr = f"{dt_part}+{tz_info}"
+        time_expr = dt.datetime.strptime(time_expr, "%Y-%m-%dT%H:%M:%S%z")
     except ValueError:
-        time_string = dt.datetime.strptime(time_string, "%Y-%m-%d")
-    return time_string
+        time_expr = dt.datetime.strptime(time_expr, "%Y-%m-%d")
+    return time_expr
+
 
 def main():
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
 
-    creds = authenticate()
-    get_events(creds)
+    calendar = GoogleCalendar()
+    # calendar.get_events()
+    # calendar.get_events_this_month()
+    calendar.get_event_for_day("2023-12-24")
+
 
 
 if __name__ == '__main__':
