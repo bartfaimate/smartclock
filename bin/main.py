@@ -2,8 +2,8 @@ from PySide2.QtWidgets import QWidget, QApplication, QHBoxLayout, QStackedWidget
 from pathlib import Path
 
 import sys
-
 sys.path.append(Path(__file__).parents[1].joinpath("lib").as_posix())
+
 from clock2py.calendar_widget import CalendarWidget
 from clock2py.clock_widget import ClockWidget
 
