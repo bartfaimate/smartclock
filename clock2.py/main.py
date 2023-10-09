@@ -1,9 +1,6 @@
 from PySide2.QtWidgets import QWidget, QApplication, QCalendarWidget, QHBoxLayout
-from PySide2.QtCore import  QLocale, Qt, QDate
-from  PySide2.QtGui import QColor, QBrush
-
-
-import PySide2
+from PySide2.QtCore import QLocale, Qt, QDate
+from PySide2.QtGui import QColor, QBrush
 
 import sys
 
@@ -11,11 +8,8 @@ from calendar_widget import CalendarWidget
 
 
 class ClockWidget(QWidget):
-
     def __init__(self):
         super(self).__init__()
-
-
 
 
 class Window(QWidget):
@@ -24,8 +18,9 @@ class Window(QWidget):
         self.resize(840, 480)
         layout = QHBoxLayout(self)
         calendar = CalendarWidget()
-        layout.addWidget( calendar)
+        layout.addWidget(calendar)
         self.setLayout(layout)
+
 
 def main():
     app = QApplication(sys.argv)
