@@ -41,7 +41,13 @@ class GoogleCalendar:
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
+                try:
+                    creds.refresh(Request())
+                except Exception as e:
+                    if token_file.exists():
+                        token_file.unlink()
+                        self.authenticate()
+
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     credentials_file.as_posix(), SCOPES

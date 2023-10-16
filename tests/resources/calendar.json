@@ -1,0 +1,177 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p33ofbjtorrs820o\"",
+  "summary": "matthaeusb@gmail.com",
+  "description": "",
+  "updated": "2023-10-15T19:00:27.062Z",
+  "timeZone": "Europe/Budapest",
+  "accessRole": "owner",
+  "defaultReminders": [
+    { "method": "email", "minutes": 10 },
+    { "method": "popup", "minutes": 30 }
+  ],
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"3329941995326000\"",
+      "id": "_chhj8dj16tim6cb3cgs3echj6kp68phh75gj4o9jccrm6e9hcgrk0pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0_20231208",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=X2NoaGo4ZGoxNnRpbTZjYjNjZ3MzZWNoajZrcDY4cGhoNzVnajRvOWpjY3JtNmU5aGNncmswcGo1ZDVpbjR0MzFjdGlpcXJyNWVkcTZhc2ppY2xrbTZxMWVjNXEwXzIwMjMxMjA4IG1hdHRoYWV1c2JAbQ",
+      "created": "2022-10-05T13:54:29.000Z",
+      "updated": "2022-10-05T11:56:37.663Z",
+      "summary": "Mari\u00e4 Empf\u00e4ngnis (\u00a7)",
+      "description": "Feiertag im Sinne des Bundesgesetzes und somit ein arbeitsfreier Tag f\u00fcr gesamt \u00d6sterreich.",
+      "creator": { "email": "matthaeusb@gmail.com", "self": true },
+      "organizer": { "email": "matthaeusb@gmail.com", "self": true },
+      "start": { "date": "2023-12-08" },
+      "end": { "date": "2023-12-09" },
+      "recurringEventId": "_chhj8dj16tim6cb3cgs3echj6kp68phh75gj4o9jccrm6e9hcgrk0pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0",
+      "originalStartTime": { "date": "2023-12-08" },
+      "iCalUID": "dc46a7ec1cd872352df19a2a3c7c91d7@feiertage-oesterreich.at",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          { "method": "email", "minutes": 430 },
+          { "method": "popup", "minutes": 30 }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3329941995326000\"",
+      "id": "_64s3gd9ic5j62o9j6cojeo9l6oo3ecb264pjgpb268rmcohicork0pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0_20231224",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=XzY0czNnZDlpYzVqNjJvOWo2Y29qZW85bDZvbzNlY2IyNjRwamdwYjI2OHJtY29oaWNvcmswcGo1ZDVpbjR0MzFjdGlpcXJyNWVkcTZhc2ppY2xrbTZxMWVjNXEwXzIwMjMxMjI0IG1hdHRoYWV1c2JAbQ",
+      "created": "2022-10-05T13:54:29.000Z",
+      "updated": "2022-10-05T11:56:37.663Z",
+      "summary": "Heiliger Abend",
+      "description": "Der 24. Dezember (Heiliger Abend) ist kein gesetzlicher Feiertag. Die Normalarbeitszeit f\u00fcr den 24. Dezember ist im Kollektivvertrag geregelt.",
+      "creator": { "email": "matthaeusb@gmail.com", "self": true },
+      "organizer": { "email": "matthaeusb@gmail.com", "self": true },
+      "start": { "date": "2023-12-24" },
+      "end": { "date": "2023-12-25" },
+      "recurringEventId": "_64s3gd9ic5j62o9j6cojeo9l6oo3ecb264pjgpb268rmcohicork0pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0",
+      "originalStartTime": { "date": "2023-12-24" },
+      "iCalUID": "18852afaa3317a56071b138eb27fb2f7@feiertage-oesterreich.at",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          { "method": "email", "minutes": 430 },
+          { "method": "popup", "minutes": 30 }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3329941995326000\"",
+      "id": "_c4rm8c3660pj6ob668r36cho64sm2o9g6sq62phh69ijaphg69h40pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0_20231225",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=X2M0cm04YzM2NjBwajZvYjY2OHIzNmNobzY0c20ybzlnNnNxNjJwaGg2OWlqYXBoZzY5aDQwcGo1ZDVpbjR0MzFjdGlpcXJyNWVkcTZhc2ppY2xrbTZxMWVjNXEwXzIwMjMxMjI1IG1hdHRoYWV1c2JAbQ",
+      "created": "2022-10-05T13:54:29.000Z",
+      "updated": "2022-10-05T11:56:37.663Z",
+      "summary": "Weihnachten (\u00a7)",
+      "description": "Feiertag im Sinne des Bundesgesetzes und somit ein arbeitsfreier Tag f\u00fcr gesamt \u00d6sterreich.",
+      "creator": { "email": "matthaeusb@gmail.com", "self": true },
+      "organizer": { "email": "matthaeusb@gmail.com", "self": true },
+      "start": { "date": "2023-12-25" },
+      "end": { "date": "2023-12-26" },
+      "recurringEventId": "_c4rm8c3660pj6ob668r36cho64sm2o9g6sq62phh69ijaphg69h40pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0",
+      "originalStartTime": { "date": "2023-12-25" },
+      "iCalUID": "a7d0f033af2632819aa074af12e5f02b@feiertage-oesterreich.at",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          { "method": "email", "minutes": 430 },
+          { "method": "popup", "minutes": 30 }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3329941995326000\"",
+      "id": "_60p3cphhcgp68e1p6gs30o9mc9h62e9occo64e9i6dh3gdpi6oo40pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0_20231226",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=XzYwcDNjcGhoY2dwNjhlMXA2Z3MzMG85bWM5aDYyZTlvY2NvNjRlOWk2ZGgzZ2RwaTZvbzQwcGo1ZDVpbjR0MzFjdGlpcXJyNWVkcTZhc2ppY2xrbTZxMWVjNXEwXzIwMjMxMjI2IG1hdHRoYWV1c2JAbQ",
+      "created": "2022-10-05T13:54:29.000Z",
+      "updated": "2022-10-05T11:56:37.663Z",
+      "summary": "Stefanitag (\u00a7)",
+      "description": "Feiertag im Sinne des Bundesgesetzes und somit ein arbeitsfreier Tag f\u00fcr gesamt \u00d6sterreich.",
+      "creator": { "email": "matthaeusb@gmail.com", "self": true },
+      "organizer": { "email": "matthaeusb@gmail.com", "self": true },
+      "start": { "date": "2023-12-26" },
+      "end": { "date": "2023-12-27" },
+      "recurringEventId": "_60p3cphhcgp68e1p6gs30o9mc9h62e9occo64e9i6dh3gdpi6oo40pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0",
+      "originalStartTime": { "date": "2023-12-26" },
+      "iCalUID": "026f1d2d89480a6bba98c0b923b87260@feiertage-oesterreich.at",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          { "method": "email", "minutes": 430 },
+          { "method": "popup", "minutes": 30 }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3329941995326000\"",
+      "id": "_6oq6ad31ccsmco9n6gpmceb2clhjid1nc8smaopo6so32p9iccrk0pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0_20231231",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=XzZvcTZhZDMxY2NzbWNvOW42Z3BtY2ViMmNsaGppZDFuYzhzbWFvcG82c28zMnA5aWNjcmswcGo1ZDVpbjR0MzFjdGlpcXJyNWVkcTZhc2ppY2xrbTZxMWVjNXEwXzIwMjMxMjMxIG1hdHRoYWV1c2JAbQ",
+      "created": "2022-10-05T13:54:29.000Z",
+      "updated": "2022-10-05T11:56:37.663Z",
+      "summary": "Silvester",
+      "description": "Der 31. Dezember (Silvester) ist kein gesetzlicher Feiertag. Die Normalarbeitszeit f\u00fcr den 31. Dezember ist im Kollektivvertrag geregelt.",
+      "creator": { "email": "matthaeusb@gmail.com", "self": true },
+      "organizer": { "email": "matthaeusb@gmail.com", "self": true },
+      "start": { "date": "2023-12-31" },
+      "end": { "date": "2024-01-01" },
+      "recurringEventId": "_6oq6ad31ccsmco9n6gpmceb2clhjid1nc8smaopo6so32p9iccrk0pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0",
+      "originalStartTime": { "date": "2023-12-31" },
+      "iCalUID": "64e4ac9fa743f9bec947b9ec8701e2c7@feiertage-oesterreich.at",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          { "method": "email", "minutes": 430 },
+          { "method": "popup", "minutes": 30 }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3329941995326000\"",
+      "id": "_c8q32p3165hj0opnc4s6aohlcdhm6eb4cgpj6e9ic8q62c1o60p40pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0_20240101",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=X2M4cTMycDMxNjVoajBvcG5jNHM2YW9obGNkaG02ZWI0Y2dwajZlOWljOHE2MmMxbzYwcDQwcGo1ZDVpbjR0MzFjdGlpcXJyNWVkcTZhc2ppY2xrbTZxMWVjNXEwXzIwMjQwMTAxIG1hdHRoYWV1c2JAbQ",
+      "created": "2022-10-05T13:54:29.000Z",
+      "updated": "2022-10-05T11:56:37.663Z",
+      "summary": "Neujahr (\u00a7)",
+      "description": "Feiertag im Sinne des Bundesgesetzes und somit ein arbeitsfreier Tag f\u00fcr gesamt \u00d6sterreich.",
+      "creator": { "email": "matthaeusb@gmail.com", "self": true },
+      "organizer": { "email": "matthaeusb@gmail.com", "self": true },
+      "start": { "date": "2024-01-01" },
+      "end": { "date": "2024-01-02" },
+      "recurringEventId": "_c8q32p3165hj0opnc4s6aohlcdhm6eb4cgpj6e9ic8q62c1o60p40pj5d5in4t31ctiiqrr5edq6asjiclkm6q1ec5q0",
+      "originalStartTime": { "date": "2024-01-01" },
+      "iCalUID": "b41da1c0c7a8eb5ccc9dd3392b4a0802@feiertage-oesterreich.at",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          { "method": "email", "minutes": 430 },
+          { "method": "popup", "minutes": 30 }
+        ]
+      },
+      "eventType": "default"
+    }
+  ]
+}
