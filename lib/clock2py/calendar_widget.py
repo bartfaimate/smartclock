@@ -1,5 +1,5 @@
 from PySide2.QtWidgets import QWidget, QApplication, QCalendarWidget, QHBoxLayout
-from PySide2.QtCore import QLocale, Qt, QDate, QRect, QPoint, Slot
+from PySide2.QtCore import QLocale, Qt, QDate, QRect, QPoint, Slot,  QTimer, QTime
 from PySide2.QtGui import QColor, QBrush, QPainter
 
 from .google_calendar import GoogleCalendar
@@ -27,8 +27,17 @@ class CalendarWidget(QCalendarWidget):
         super(CalendarWidget, self).currentPageChanged.connect(
             self.handleCurrentPageChanged
         )
+        # fetch_period = 5* 60 * 1000 # 5 min 
+        fetch_period = 10 * 1000 # 5 min 
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.handleTimeout)
+        self.timer.start(fetch_period)
 
     def init_calendar(self):
+        today = QDate().currentDate()
+        self.year = today.year()
+        self.month = today.month()
+
         google_calendar = GoogleCalendar()
         self.events = google_calendar.get_events_this_month()
         self.events_dates = {QDate(date) for date in self.events}
@@ -56,7 +65,7 @@ class CalendarWidget(QCalendarWidget):
             # painter.drawRect(rect)
             # painter.fillRect(rect, COLORS["EVENT"]["BG"])
             # painter.drawRect(rect)
-
+    
     def get_events_for_month(self, year: int, month: int):
         events = self.google_calendar.get_events_for_month(year, month)
         self.events_dates = {QDate(date) for date in events}
@@ -67,8 +76,20 @@ class CalendarWidget(QCalendarWidget):
 
     @Slot(int, int)
     def handleCurrentPageChanged(self, year: int, month: int):
+        self.year = year
+        self.month = month
         self.get_events_for_month(year, month)
 
     @Slot(QDate)
     def handleClicked(self, date: QCalendarWidget):
         self.get_events_for_day(date)
+
+    @Slot()
+    def handleTimeout(self):
+        self.fetch()
+
+    def fetch(self):
+        # TODO: make cache timed cache
+        print("fetching new data")
+        self.get_events_for_month(self.year, self.month)
+        self.update()
