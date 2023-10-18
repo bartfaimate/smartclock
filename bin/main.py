@@ -13,6 +13,7 @@ class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
         self.resize(840, 480)
+        # self.windowType()
         layout = QHBoxLayout(self)
         calendar = CalendarWidget()
         clock = ClockWidget()

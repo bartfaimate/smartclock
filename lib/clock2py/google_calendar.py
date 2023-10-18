@@ -26,8 +26,12 @@ logging.basicConfig(stream=sys.stdout)
 
 
 class GoogleCalendar:
+
+    timeout = 900
+
     def __init__(self) -> None:
         self.creds = self.authenticate()
+        self.timeout = 1800
 
     def authenticate(self):
         creds = None
@@ -59,7 +63,8 @@ class GoogleCalendar:
                 token.write(creds.to_json())
         return creds
 
-    @lru_cache(maxsize=128)
+    # @lru_cache(maxsize=128)
+    @cached(TTLCache(128, ttl=timeout))
     def get_events_for_month(self, year: int, month: int):
         begin = datetime.datetime(year=year, month=month, day=1) - datetime.timedelta(
             days=5
@@ -74,18 +79,22 @@ class GoogleCalendar:
 
         return self.get_events(max_results=500, begin=begin, end=end)
 
-    @lru_cache(maxsize=128)
+    # @lru_cache(maxsize=128)
+    @cached(TTLCache(128, ttl=timeout))
     def get_event_for_day(self, date: Union[str, datetime.datetime]):
         begin = parse_time(date)
         end = begin + dt.timedelta(days=1)
         return self.get_events(max_results=50, begin=begin, end=end)
 
-    @lru_cache(maxsize=128)
+    # @lru_cache(maxsize=128)
+    @cached(TTLCache(128, ttl=timeout))
     def get_events(self, max_results: int = 100, begin=None, end=None):
         if not begin or not end:
             now = datetime.datetime.now()
             begin = begin or now
             end = end or (dt.timedelta(days=30) + begin)
+        begin = parse_time(begin)
+        end = parse_time(end)
         begin = begin.isoformat() + "Z"
         end = end.isoformat() + "Z"
 
