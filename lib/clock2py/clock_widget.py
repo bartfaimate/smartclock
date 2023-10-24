@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout
 class ClockWidget(QWidget):
     def __init__(self, parent=None, posx=0, posy=0):
         super(ClockWidget, self).__init__(parent)
+        self.parent = parent
         self.digit = 0
         self.position = (posx, posy)
         self.hours = 0
@@ -16,24 +17,42 @@ class ClockWidget(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.handleTimeout)
         self.timer.start(1000)
+        self.fontsize = self.parent.width() * 10 // 25
 
     def paintEvent(self, event: QPaintEvent) -> None:
         self.paint()
 
     def drawColons(self, painter):
-        painter.drawText(340, self.height() - 60, ":")
+        pos = 340
+        pos = self.parent.width() * 10 // 25
+        painter.drawText(pos, self.height() - 60, ":")
+        # 840 - 340 = 500
+        # 840 - 22 = 818 - 340 = 478 
 
     def drawHours(self, painter: QPainter, hours: int):
         digit1 = hours % 10
         digit2 = hours // 10
-        painter.drawText(0, self.height() - 60, str(digit2))
-        painter.drawText(180, self.height() - 60, str(digit1))
+        second = self.width() // 2 + 50
+        # painter.drawText(0, self.height() - 60, str(digit2))
+        # painter.drawText(second, self.height() - 60, str(digit1))
+        hours = f"0{hours}" if hours < 10 else f"{hours}"
+        painter.drawText(0, self.height() - 60, hours)
+
 
     def drawMinutes(self, painter: QPainter, minutes: int):
         digit1 = minutes % 10
         digit2 = minutes // 10
-        painter.drawText(430, self.height() - 60, str(digit2))
-        painter.drawText(610, self.height() - 60, str(digit1))
+        first = 430
+        first = 430
+
+        first = self.fontsize // 2
+
+        second = self.width() // 2 + 10
+        # painter.drawText(first, self.height() - 60, str(digit2))
+        # painter.drawText(first + second, self.height() - 60, str(digit1))
+        minutes = f"0{minutes}" if minutes < 10 else f"{minutes}"
+        painter.drawText(second, self.height() - 60, minutes)
+
 
     def paint(self):
         pen = QPen()
@@ -43,7 +62,7 @@ class ClockWidget(QWidget):
         painter.setPen(Qt.black)
         # painter.setFont(QFont("Arial", min(self.height(), self.width()) - 60))
         font = QFont("Helvetica")
-        font.setPixelSize(350)
+        font.setPixelSize(self.fontsize)
         painter.setFont(font)
 
         font = QFont()
@@ -68,7 +87,9 @@ class Window(QWidget):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("Smartclock")
+        # self.setGeometry(100, 100, 1920, 1080)
         self.setGeometry(100, 100, 840, 480)
+
         layout = QHBoxLayout()
 
         digit = ClockWidget(parent=self, posx=20, posy=20)
