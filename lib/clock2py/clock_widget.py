@@ -17,7 +17,10 @@ class ClockWidget(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.handleTimeout)
         self.timer.start(1000)
-        self.fontsize = self.parent.width() * 10 // 25
+        if not parent:
+            self.fontsize = 55
+        else:
+            self.fontsize = self.parent.width() * 10 // 25
 
     def paintEvent(self, event: QPaintEvent) -> None:
         self.paint()

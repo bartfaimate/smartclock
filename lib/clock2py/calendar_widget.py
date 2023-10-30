@@ -1,5 +1,21 @@
-from PySide2.QtWidgets import QWidget, QApplication, QCalendarWidget, QHBoxLayout
-from PySide2.QtCore import QLocale, Qt, QDate, QRect, QPoint, Slot,  QTimer, QTime
+from PySide2.QtWidgets import (
+    QWidget,
+    QApplication,
+    QCalendarWidget,
+    QHBoxLayout,
+    QSplitter,
+    QListWidget,
+)
+from PySide2.QtCore import (
+    QLocale,
+    Qt,
+    QDate,
+    QRect,
+    QPoint,
+    Slot,
+    QTimer,
+    QTime,
+)
 from PySide2.QtGui import QColor, QBrush, QPainter
 
 from .google_calendar import GoogleCalendar
@@ -16,6 +32,28 @@ COLORS = {
 }
 
 
+class Calendar2Widget(QSplitter):
+    def __init__(self):
+        super(Calendar2Widget, self).__init__()
+
+        self.calendar = CalendarWidget()
+        self.day_widget = QListWidget()
+        self.addWidget(self.calendar)
+        self.addWidget(self.day_widget)
+        self.calendar.clicked.connect(self.handleClicked)
+
+    @Slot(QDate)
+    def handleClicked(self, date: QCalendarWidget):
+        self.day_widget.clear()
+
+        events = self.calendar.get_events_for_day(date)
+
+        for timestamp, summary in events.items():
+            timestamp: datetime.datetime
+            item = f"{timestamp.time()} {summary}"
+            self.day_widget.addItem(str(item))
+
+
 class CalendarWidget(QCalendarWidget):
     def __init__(self):
         super(CalendarWidget, self).__init__()
@@ -27,8 +65,8 @@ class CalendarWidget(QCalendarWidget):
         super(CalendarWidget, self).currentPageChanged.connect(
             self.handleCurrentPageChanged
         )
-        # fetch_period = 5* 60 * 1000 # 5 min 
-        fetch_period = 10 * 1000 # 5 min 
+        # fetch_period = 5* 60 * 1000 # 5 min
+        fetch_period = 10 * 1000  # 5 min
         self.timer = QTimer()
         self.timer.timeout.connect(self.handleTimeout)
         self.timer.start(fetch_period)
@@ -65,14 +103,14 @@ class CalendarWidget(QCalendarWidget):
             # painter.drawRect(rect)
             # painter.fillRect(rect, COLORS["EVENT"]["BG"])
             # painter.drawRect(rect)
-    
+
     def get_events_for_month(self, year: int, month: int):
         events = self.google_calendar.get_events_for_month(year, month)
         self.events_dates = {QDate(date) for date in events}
 
     def get_events_for_day(self, date: QDate):
         date = date.toPython()
-        self.google_calendar.get_event_for_day(date)
+        return self.google_calendar.get_event_for_day(date)
 
     @Slot(int, int)
     def handleCurrentPageChanged(self, year: int, month: int):
@@ -93,3 +131,29 @@ class CalendarWidget(QCalendarWidget):
         print("fetching new data")
         self.get_events_for_month(self.year, self.month)
         self.update()
+
+
+class Window(QWidget):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.setWindowTitle("Smartclock")
+        # self.setGeometry(100, 100, 1920, 1080)
+        self.setGeometry(100, 100, 840, 480)
+
+        layout = QHBoxLayout()
+
+        calendar = CalendarWidget()
+
+        layout.addWidget(calendar)
+        self.setLayout(layout)
+
+        self.show()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    # clock = FlipClock()
+    window = Window()
+
+    sys.exit(app.exec_())

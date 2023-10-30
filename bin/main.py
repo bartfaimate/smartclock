@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(Path(__file__).parents[1].joinpath("lib").as_posix())
 
-from clock2py.calendar_widget import CalendarWidget
+from clock2py.calendar_widget import Calendar2Widget
 from clock2py.clock_widget import ClockWidget
 
 
@@ -15,11 +15,11 @@ class Window(QWidget):
         self.resize(840, 480)
         # self.windowType()
         layout = QHBoxLayout(self)
-        calendar = CalendarWidget()
-        clock = ClockWidget()
+        calendar = Calendar2Widget()
+        clock = ClockWidget(parent=self)
 
         stacked_widget = QStackedLayout(self)
-        stacked_widget.addWidget(clock)
+        # stacked_widget.addWidget(clock)
         stacked_widget.addWidget(calendar)
 
         layout.addLayout(stacked_widget)

@@ -30,7 +30,14 @@ class GoogleCalendar:
     timeout = 900
 
     def __init__(self) -> None:
-        self.creds = self.authenticate()
+        self.token_file = Path(__file__).parent.joinpath("token.json").resolve()
+        self.credentials_file = Path(__file__).parent.joinpath("credentials.json").resolve()
+        try:
+            self.creds = self.authenticate()
+        except RuntimeError as e:
+            if self.token_file.exists():
+                self.token_file.unlink()
+                self.authenticate()
         self.timeout = 1800
 
     def authenticate(self):
@@ -38,28 +45,24 @@ class GoogleCalendar:
         # The file credentials.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        token_file = Path(__file__).parent.joinpath("token.json").resolve()
-        credentials_file = Path(__file__).parent.joinpath("credentials.json").resolve()
-
-        if token_file.exists():
-            creds = Credentials.from_authorized_user_file(token_file.as_posix(), SCOPES)
+        
+        if self.token_file.exists():
+            creds = Credentials.from_authorized_user_file(self.token_file.as_posix(), SCOPES)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 try:
                     creds.refresh(Request())
                 except Exception as e:
-                    if token_file.exists():
-                        token_file.unlink()
-                        self.authenticate()
-
+                    log.error(f"Authentication failed {e}")
+                    raise RuntimeError("Authentication failed")
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    credentials_file.as_posix(), SCOPES
+                    self.credentials_file.as_posix(), SCOPES
                 )
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
-            with token_file.open("w") as token:
+            with self.token_file.open("w") as token:
                 token.write(creds.to_json())
         return creds
 
