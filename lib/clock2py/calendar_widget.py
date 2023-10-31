@@ -18,7 +18,7 @@ from PySide2.QtCore import (
 )
 from PySide2.QtGui import QColor, QBrush, QPainter
 
-from .google_calendar import GoogleCalendar
+from clock2py.google_calendar import GoogleCalendar
 import PySide2
 
 import datetime
@@ -65,8 +65,8 @@ class CalendarWidget(QCalendarWidget):
         super(CalendarWidget, self).currentPageChanged.connect(
             self.handleCurrentPageChanged
         )
-        # fetch_period = 5* 60 * 1000 # 5 min
-        fetch_period = 10 * 1000  # 5 min
+        fetch_period = 5 * 60 * 1000 # 5 min
+        # fetch_period = 10 * 1000  # 5 min
         self.timer = QTimer()
         self.timer.timeout.connect(self.handleTimeout)
         self.timer.start(fetch_period)
@@ -128,7 +128,6 @@ class CalendarWidget(QCalendarWidget):
 
     def fetch(self):
         # TODO: make cache timed cache
-        print("fetching new data")
         self.get_events_for_month(self.year, self.month)
         self.update()
 

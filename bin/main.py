@@ -1,29 +1,13 @@
-from PySide2.QtWidgets import QWidget, QApplication, QHBoxLayout, QStackedWidget, QStackedLayout
+from PySide2.QtWidgets import (
+    QApplication,
+)
 from pathlib import Path
 
 import sys
 
 sys.path.append(Path(__file__).parents[1].joinpath("lib").as_posix())
 
-from clock2py.calendar_widget import Calendar2Widget
-from clock2py.clock_widget import ClockWidget
-
-
-class Window(QWidget):
-    def __init__(self):
-        super(Window, self).__init__()
-        self.resize(840, 480)
-        # self.windowType()
-        layout = QHBoxLayout(self)
-        calendar = Calendar2Widget()
-        clock = ClockWidget(parent=self)
-
-        stacked_widget = QStackedLayout(self)
-        # stacked_widget.addWidget(clock)
-        stacked_widget.addWidget(calendar)
-
-        layout.addLayout(stacked_widget)
-        self.setLayout(layout)
+from clock2py.window import Window
 
 
 def main():

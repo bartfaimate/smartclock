@@ -26,38 +26,23 @@ class ClockWidget(QWidget):
         self.paint()
 
     def drawColons(self, painter):
-        pos = 340
         pos = self.parent.width() * 10 // 25
         painter.drawText(pos, self.height() - 60, ":")
         # 840 - 340 = 500
-        # 840 - 22 = 818 - 340 = 478 
+        # 840 - 22 = 818 - 340 = 478
 
     def drawHours(self, painter: QPainter, hours: int):
-        digit1 = hours % 10
-        digit2 = hours // 10
-        second = self.width() // 2 + 50
-        # painter.drawText(0, self.height() - 60, str(digit2))
-        # painter.drawText(second, self.height() - 60, str(digit1))
         hours = f"0{hours}" if hours < 10 else f"{hours}"
         painter.drawText(0, self.height() - 60, hours)
 
-
     def drawMinutes(self, painter: QPainter, minutes: int):
-        digit1 = minutes % 10
-        digit2 = minutes // 10
-        first = 430
-        first = 430
-
-        first = self.fontsize // 2
-
         second = self.width() // 2 + 10
-        # painter.drawText(first, self.height() - 60, str(digit2))
-        # painter.drawText(first + second, self.height() - 60, str(digit1))
         minutes = f"0{minutes}" if minutes < 10 else f"{minutes}"
         painter.drawText(second, self.height() - 60, minutes)
 
-
     def paint(self):
+        self.fontsize = self.parent.width() * 10 // 25
+
         pen = QPen()
         pen.setColor(Qt.green)
         painter = QPainter(self)
@@ -78,10 +63,14 @@ class ClockWidget(QWidget):
         self.hours = now.hour()
         self.minutes = now.minute()
 
-    @Slot()
-    def handleTimeout(self):
+    def update(self):
         self.setCurrentTime()
         self.paint()
+
+    @Slot()
+    def handleTimeout(self):
+        # self.setCurrentTime()
+        # self.paint()
         self.update()
 
 
