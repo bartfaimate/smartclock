@@ -1,6 +1,6 @@
 import sys
 import typing
-from PySide2.QtCore import Qt, QTimer, QTime, QRect, Slot
+from PySide2.QtCore import Qt, QTimer, QTime, QRect, Slot, QEvent
 from PySide2.QtGui import QFont, QPainter, QPalette, QColor, QPen, QPaintEvent
 from PySide2.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout
 
@@ -17,13 +17,14 @@ class ClockWidget(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.handleTimeout)
         self.timer.start(1000)
+
         if not parent:
             self.fontsize = 55
         else:
             self.fontsize = self.parent.width() * 10 // 25
 
     def paintEvent(self, event: QPaintEvent) -> None:
-        self.paint()
+        self.paintClock()
 
     def drawColons(self, painter):
         pos = self.parent.width() * 10 // 25
@@ -40,20 +41,19 @@ class ClockWidget(QWidget):
         minutes = f"0{minutes}" if minutes < 10 else f"{minutes}"
         painter.drawText(second, self.height() - 60, minutes)
 
-    def paint(self):
+    def paintClock(self):
         self.fontsize = self.parent.width() * 10 // 25
+        painter = QPainter(self)
 
         pen = QPen()
         pen.setColor(Qt.green)
-        painter = QPainter(self)
-
         painter.setPen(Qt.black)
         # painter.setFont(QFont("Arial", min(self.height(), self.width()) - 60))
         font = QFont("Helvetica")
         font.setPixelSize(self.fontsize)
         painter.setFont(font)
 
-        font = QFont()
+        # font = QFont()
         self.drawHours(painter, self.hours)
         self.drawColons(painter)
         self.drawMinutes(painter, self.minutes)
@@ -63,13 +63,17 @@ class ClockWidget(QWidget):
         self.hours = now.hour()
         self.minutes = now.minute()
 
-    def update(self):
-        self.setCurrentTime()
-        self.paint()
+    # def update(self):
+    #     self.setCurrentTime()
+    #     self.repaint()
 
+    def event(self, event: QEvent) -> bool:
+        # print(event.type())
+        return super().event(event)
+    
     @Slot()
     def handleTimeout(self):
-        # self.setCurrentTime()
+        self.setCurrentTime()
         # self.paint()
         self.update()
 
