@@ -15,8 +15,9 @@ from PySide2.QtCore import (
     Slot,
     QTimer,
     QTime,
+    QEvent,
 )
-from PySide2.QtGui import QColor, QBrush, QPainter
+from PySide2.QtGui import QColor, QBrush, QPainter, QMouseEvent
 
 from clock2py.google_calendar import GoogleCalendar
 import PySide2
@@ -42,6 +43,15 @@ class Calendar2Widget(QSplitter):
         self.addWidget(self.day_widget)
         self.calendar.clicked.connect(self.handleClicked)
 
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        print("cal press")
+        return super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        print("cal release")
+        return super().mouseReleaseEvent(event)
+
+
     @Slot(QDate)
     def handleClicked(self, date: QCalendarWidget):
         self.day_widget.clear()
@@ -65,7 +75,7 @@ class CalendarWidget(QCalendarWidget):
         super(CalendarWidget, self).currentPageChanged.connect(
             self.handleCurrentPageChanged
         )
-        fetch_period = 5 * 60 * 1000 # 5 min
+        fetch_period = 5 * 60 * 1000  # 5 min
         # fetch_period = 10 * 1000  # 5 min
         self.timer = QTimer()
         self.timer.timeout.connect(self.handleTimeout)
@@ -81,6 +91,14 @@ class CalendarWidget(QCalendarWidget):
         self.events_dates = {QDate(date) for date in self.events}
         return google_calendar
 
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        print("cal press")
+        return super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        print("cal release")
+        return super().mouseReleaseEvent(event)
+    
     def paintCell(self, painter: QPainter, rect: QRect, date: QDate) -> None:
         super(CalendarWidget, self).paintCell(painter, rect, date)
         today = QDate().currentDate()
@@ -130,6 +148,18 @@ class CalendarWidget(QCalendarWidget):
         # TODO: make cache timed cache
         self.get_events_for_month(self.year, self.month)
         self.update()
+
+    def event(self, event: QEvent) -> bool:
+        # print(event.type())
+        return super().event(event)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        print("cal press")
+        return super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        print("cal release")
+        return super().mouseReleaseEvent(event)
 
 
 class Window(QWidget):
