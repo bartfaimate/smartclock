@@ -86,11 +86,11 @@ class DayWidget(QWidget):
         font = QFont("Helvetica")
         font.setPixelSize(self.fontsize)
         painter.setFont(font)
-
-        for i in range(24):
+        self.setFixedHeight(24*40)
+        for i in range(1,25):
             y1, y2 = i * 40,   i * 40
             line = QLine(0, y1, self.width(), y2)
-            painter.drawText(0, y1, f"{i}")
+            painter.drawText(0, y1, f"{i-1}".zfill(2))
             painter.drawLine(line)
 
 

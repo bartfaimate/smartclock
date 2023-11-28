@@ -37,7 +37,7 @@ class GoogleCalendar:
         except RuntimeError as e:
             if self.token_file.exists():
                 self.token_file.unlink()
-                self.authenticate()
+                self.creds = self.authenticate()
         self.timeout = 1800
 
     def authenticate(self):
