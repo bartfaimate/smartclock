@@ -1,11 +1,6 @@
-from PySide2.QtWidgets import (
-    QWidget,
-    QApplication,
-    QCalendarWidget,
-    QHBoxLayout,
-    QSplitter,
-    QListWidget,
-)
+import datetime
+import sys
+
 from PySide2.QtCore import (
     QLocale,
     Qt,
@@ -14,16 +9,22 @@ from PySide2.QtCore import (
     QPoint,
     Slot,
     QTimer,
-    QTime,
+    QLine,
     QEvent,
 )
-from PySide2.QtGui import QColor, QBrush, QPainter, QMouseEvent
+from PySide2.QtGui import QColor, QPainter, QMouseEvent, QPen, QFont, QPaintEvent
+from PySide2.QtWidgets import (
+    QWidget,
+    QApplication,
+    QCalendarWidget,
+    QHBoxLayout,
+    QSplitter,
+    QListWidget,
+QScrollArea,
+    QGraphicsWidget,
+)
 
 from clock2py.google_calendar import GoogleCalendar
-import PySide2
-
-import datetime
-import sys
 
 COLORS = {
     "EVENT": {
@@ -62,6 +63,35 @@ class Calendar2Widget(QSplitter):
             timestamp: datetime.datetime
             item = f"{timestamp.time()} {summary}"
             self.day_widget.addItem(str(item))
+
+
+class DayWidget(QWidget):
+
+    def __init__(self, parent) -> None:
+        self.parent = parent
+        super(DayWidget, self).__init__(parent)
+        self.setGeometry(parent.geometry())
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+       self.paintDay()
+
+    def paintDay(self):
+        self.fontsize = 20
+        painter = QPainter(self)
+
+        pen = QPen()
+        pen.setColor(Qt.green)
+        painter.setPen(Qt.black)
+        # painter.setFont(QFont("Arial", min(self.height(), self.width()) - 60))
+        font = QFont("Helvetica")
+        font.setPixelSize(self.fontsize)
+        painter.setFont(font)
+
+        for i in range(24):
+            y1, y2 = i * 40,   i * 40
+            line = QLine(0, y1, self.width(), y2)
+            painter.drawText(0, y1, f"{i}")
+            painter.drawLine(line)
 
 
 class CalendarWidget(QCalendarWidget):
@@ -163,6 +193,7 @@ class CalendarWidget(QCalendarWidget):
 
 
 class Window(QWidget):
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -171,10 +202,11 @@ class Window(QWidget):
         self.setGeometry(100, 100, 840, 480)
 
         layout = QHBoxLayout()
+        scrollarea = QScrollArea()
+        calendar = DayWidget(parent=self)
+        scrollarea.setWidget(calendar)
 
-        calendar = CalendarWidget()
-
-        layout.addWidget(calendar)
+        layout.addWidget(scrollarea)
         self.setLayout(layout)
 
         self.show()

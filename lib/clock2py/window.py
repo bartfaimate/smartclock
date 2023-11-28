@@ -5,7 +5,7 @@ from PySide2.QtWidgets import (
     QStackedWidget,
     QStackedLayout,
     QSwipeGesture,
-    QGestureRecognizer
+    QGestureRecognizer,
 )
 from PySide2.QtCore import QEvent, Qt, QPoint
 from PySide2.QtGui import QMouseEvent
@@ -15,15 +15,16 @@ from clock2py.clock_widget import ClockWidget
 
 
 class Window(QWidget):
-
     def __init__(self):
         super(Window, self).__init__()
-        self.setWindowFlags(Qt.Window
-                            | Qt.FramelessWindowHint
-                            | Qt.WindowSystemMenuHint
-                            | Qt.WindowMinimizeButtonHint
-                            | Qt.WindowMaximizeButtonHint
-                            | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(
+            Qt.Window
+            | Qt.FramelessWindowHint
+            | Qt.WindowSystemMenuHint
+            | Qt.WindowMinimizeButtonHint
+            | Qt.WindowMaximizeButtonHint
+            | Qt.WindowCloseButtonHint
+        )
         self.resize(840, 480)
         # self.windowType()
         layout = QHBoxLayout(self)
@@ -53,27 +54,25 @@ class Window(QWidget):
     #         print("drag")
 
     #     return True
-    
+
     def mousePressEvent(self, event: QMouseEvent) -> None:
         print("press")
         self.startPos = event.pos()
         return super().mousePressEvent(event)
-    
+
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         print("release")
         self.endPos = event.pos()
         self.mov = self.endPos - self.startPos
         self.handleswipe(self.mov)
         return super().mouseReleaseEvent(event)
-    
+
     def handleswipe(self, movement: QPoint):
         if movement.y() > 100:
-            return 
+            return
         if abs(movement.x()) < abs(3 * movement.y()):
             return
         if movement.x() > 0:
-            self.stacked_widget.setCurrentIndex(self.stacked_widget.currentIndex()+1)
+            self.stacked_widget.setCurrentIndex(self.stacked_widget.currentIndex() + 1)
         else:
-            self.stacked_widget.setCurrentIndex(self.stacked_widget.currentIndex()-1)
-
-
+            self.stacked_widget.setCurrentIndex(self.stacked_widget.currentIndex() - 1)
