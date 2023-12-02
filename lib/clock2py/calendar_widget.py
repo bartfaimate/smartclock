@@ -1,6 +1,6 @@
 import datetime
 import sys
-
+from enum import  Enum
 from PySide2.QtCore import (
     QLocale,
     Qt,
@@ -65,17 +65,38 @@ class Calendar2Widget(QSplitter):
             self.day_widget.addItem(str(item))
 
 
+class HourFormat(Enum):
+    FORMAT_AM_PM = 1
+    FORMAT_24H = 2
+
+
 class DayWidget(QWidget):
 
-    def __init__(self, parent) -> None:
+    FORMAT_MAP = {i : f"am {str(i % 12 ).zfill(2)}"  if i < 12 else f"pm {str(i % 12 ).zfill(2)}" for i in range(0, 24)}
+    FORMAT_MAP.update( {
+        0: "am 12",
+        12: "pm 12"
+    })
+
+    def __init__(self, parent, hour_format:HourFormat = HourFormat.FORMAT_24H) -> None:
         self.parent = parent
         super(DayWidget, self).__init__(parent)
         self.setGeometry(parent.geometry())
+        self.blockheight = 40
+        self.hour_format = HourFormat.FORMAT_AM_PM
 
+    def setHourFormat(self, hour_format: HourFormat):
+        self.hour_format = hour_format
+
+    # def addGEvent(self, ):
     def paintEvent(self, event: QPaintEvent) -> None:
        self.paintDay()
 
+    def calculateBlockHeight(self):
+        self.blockheight = 40 if self.parent.height() < 24 * 40 else self.parent.height() / 24
+
     def paintDay(self):
+        self.calculateBlockHeight()
         self.fontsize = 20
         painter = QPainter(self)
 
@@ -86,11 +107,17 @@ class DayWidget(QWidget):
         font = QFont("Helvetica")
         font.setPixelSize(self.fontsize)
         painter.setFont(font)
-        self.setFixedHeight(24*40)
-        for i in range(1,25):
-            y1, y2 = i * 40,   i * 40
+
+        self.setFixedHeight(24 * self.blockheight)
+
+        for i in range(1, 25):
+            hour = i - 1
+            y1, y2 = i * self.blockheight,   i * self.blockheight
             line = QLine(0, y1, self.width(), y2)
-            painter.drawText(0, y1, f"{i-1}".zfill(2))
+            formatted_time = f"{str(hour).zfill(2)}:00" if self.hour_format == HourFormat.FORMAT_24H else f"{self.FORMAT_MAP[hour]}:00"
+
+            painter.drawText(0, y1, formatted_time)
+
             painter.drawLine(line)
 
 

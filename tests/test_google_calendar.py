@@ -3,9 +3,10 @@ from unittest.mock import MagicMock, patch
 from pathlib import Path
 import sys
 
+import  datetime as dt
 sys.path.append(Path(__file__).parents[1].joinpath("lib").as_posix())
 
-from clock2py.google_calendar import GoogleCalendar
+from clock2py.google_calendar import GoogleCalendar, parse_time
 
 
 class TestGoogleCalendar(unittest.TestCase):
@@ -22,6 +23,17 @@ class TestGoogleCalendar(unittest.TestCase):
                 result = calendar.get_events(begin=begin, end=end)
                 self.assertTrue(isinstance(result, dict))
                 self.assertEqual(result, 5)
+
+    def test_parse_time(self):
+        self.assertEqual(parse_time("2023-12-01"), dt.datetime(2023, 12, 1))
+        self.assertEqual(parse_time("2023-12-01T12:30"), dt.datetime(2023, 12, 1, 12, 30))
+        self.assertEqual(parse_time("2023-12-01T12:30:12"), dt.datetime(2023, 12, 1, 12, 30, 12))
+        self.assertEqual(parse_time("2023-12-01T12:30:00"), dt.datetime(2023, 12, 1, 12, 30, 0))
+        with self.assertRaises(ValueError):
+            self.assertEqual(parse_time("2023-12-01T12:60:00"), dt.datetime(2023, 12, 1, 12, 30, 0))
+
+        self.assertEqual(parse_time("2023-12-01T12:10:00+02:00"), dt.datetime(2023, 12, 1, 12, 10, 0, tzinfo=dt.timezone(dt.timedelta(seconds=7200))))
+
 
 
 

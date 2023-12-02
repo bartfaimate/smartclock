@@ -86,7 +86,7 @@ class GoogleCalendar:
     @cached(TTLCache(128, ttl=timeout))
     def get_event_for_day(self, date: Union[str, datetime.datetime]):
         begin = parse_time(date)
-        end = begin + dt.timedelta(days=1)
+        end = begin + dt.timedelta(minutes=24*60-1)
         return self.get_events(max_results=50, begin=begin, end=end)
 
     # @lru_cache(maxsize=128)
@@ -128,11 +128,11 @@ class GoogleCalendar:
             result = {}
             result = defaultdict(list)
             for event in events:
-                start = event["start"].get("dateTime", event["start"].get("date"))
-                start = parse_time(start)
-                end = event["end"].get("dateTime", event["end"].get("date"))
-                end = parse_time(end)
-                for date_ in subset(start_date=start, end_date=end):
+                event_start = event["start"].get("dateTime", event["start"].get("date"))
+                event_start = parse_time(event_start)
+                event_end = event["end"].get("dateTime", event["end"].get("date"))
+                event_end = parse_time(event_end)
+                for date_ in subset(start_date=event_start, end_date=event_end):
                     log.info(f"{date_}: {event['summary']}")
                     result[date_].append(event["summary"])
             return result
@@ -151,7 +151,7 @@ def subset(start_date, end_date):
 
 def parse_time(time_expr: str) -> datetime.datetime:
     if not time_expr:
-        raise RuntimeError("Tiem exrpession should be provided")
+        raise RuntimeError("Time expression should be provided")
     if isinstance(time_expr, datetime.datetime):
         return time_expr
     if isinstance(time_expr, datetime.date):
@@ -160,15 +160,20 @@ def parse_time(time_expr: str) -> datetime.datetime:
         )
     if not isinstance(time_expr, str):
         return time_expr
-    try:
-        dt_part, tz_info = time_expr.split("+")
-        tz_info = tz_info.replace(":", "")
-        time_expr = f"{dt_part}+{tz_info}"
-        time_expr = dt.datetime.strptime(time_expr, "%Y-%m-%dT%H:%M:%S%z")
-    except ValueError:
-        time_expr = dt.datetime.strptime(time_expr, "%Y-%m-%d")
-    return time_expr
 
+    formats = ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S%z")
+    for fmt in formats:
+        try:
+            if fmt == "%Y-%m-%dT%H:%M:%S%z":
+                dt_part, tz_info = time_expr.split("+")
+                tz_info = tz_info.replace(":", "")
+                time_expr = f"{dt_part}+{tz_info}"
+            time_expr = dt.datetime.strptime(time_expr, fmt)
+        except ValueError:
+            continue
+        else:
+            return time_expr
+    raise ValueError("Wrong date format")
 
 def main():
     """Shows basic usage of the Google Calendar API.
@@ -178,8 +183,8 @@ def main():
     calendar = GoogleCalendar()
     # calendar.get_events()
     # calendar.get_events_this_month()
-    # calendar.get_event_for_day("2023-10-13")
-    calendar.get_events_for_month(2023, 12)
+    calendar.get_event_for_day("2023-12-24")
+    # calendar.get_events_for_month(2023, 12)
 
 
 if __name__ == "__main__":
