@@ -96,10 +96,8 @@ class GoogleCalendar:
             now = datetime.datetime.now()
             begin = begin or now
             end = end or (dt.timedelta(days=30) + begin)
-        begin = parse_time(begin)
-        end = parse_time(end)
-        begin = begin.isoformat() + "Z"
-        end = end.isoformat() + "Z"
+        begin = parse_time(begin).isoformat() + get_tz_offset(begin)
+        end = parse_time(end).isoformat() + get_tz_offset(end)
 
         try:
             service = build("calendar", "v3", credentials=self.creds)
@@ -174,6 +172,19 @@ def parse_time(time_expr: str) -> datetime.datetime:
         else:
             return time_expr
     raise ValueError("Wrong date format")
+
+
+def get_tz_offset(date_time: dt.datetime):
+    tz_info = date_time.astimezone().tzinfo
+
+    delta = tz_info.utcoffset(date_time)
+
+    delta = int(delta.seconds)
+    delta_h = delta // 3600
+    sign = "+" if delta_h >= 0 else "-"
+    delta_m = delta % 3600 // 60
+    return f"{sign}{str(abs(delta_h)).zfill(2)}:{str(delta_m).zfill(2)}"
+
 
 def main():
     """Shows basic usage of the Google Calendar API.
