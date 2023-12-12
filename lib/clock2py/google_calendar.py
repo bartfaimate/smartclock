@@ -5,6 +5,10 @@ from typing import Union
 from collections import defaultdict
 from functools import lru_cache
 from cachetools import cached, TTLCache
+from  dataclasses import dataclass
+import datetime as dt
+import logging
+
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -14,10 +18,6 @@ from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file credentials.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-
-import datetime as dt
-
-import logging
 
 
 log = logging.getLogger("google-calendar")
@@ -139,6 +139,25 @@ class GoogleCalendar:
             log.error(f"An error occurred: {error}")
 
 
+@dataclass
+class GoogleEvent:
+
+    created: dt.datetime
+    updated: dt.datetime
+    start: dt.datetime
+    end: dt.datetime
+    duration: dt.timedelta
+    summary: str
+    description: str
+
+    def __init__(self, start, end, summary, description):
+        self.start = parse_time(start)
+        self.end = parse_time(end)
+        self.summary = summary
+        self.description = description
+        raise NotImplementedError
+
+
 def subset(start_date, end_date):
     start_date = parse_time(start_date)
     end_date = parse_time(end_date)
@@ -175,11 +194,13 @@ def parse_time(time_expr: str) -> datetime.datetime:
 
 
 def get_tz_offset(date_time: dt.datetime):
-    tz_info = date_time.astimezone().tzinfo
+
+    tz_info = date_time.tzinfo if date_time.tzinfo else date_time.astimezone().tzinfo
+
 
     delta = tz_info.utcoffset(date_time)
 
-    delta = int(delta.seconds)
+    delta = int(delta.seconds) + int(delta.days) * 24 * 3600
     delta_h = delta // 3600
     sign = "+" if delta_h >= 0 else "-"
     delta_m = delta % 3600 // 60

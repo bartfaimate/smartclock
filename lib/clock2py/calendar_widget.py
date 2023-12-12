@@ -95,6 +95,9 @@ class DayWidget(QWidget):
     def calculateBlockHeight(self):
         self.blockheight = 40 if self.parent.height() < 24 * 40 else self.parent.height() / 24
 
+    def addGoogleEvent(self, start_date, duration):
+        raise NotImplementedError
+
     def paintDay(self):
         self.calculateBlockHeight()
         self.fontsize = 20
