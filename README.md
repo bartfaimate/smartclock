@@ -18,3 +18,4 @@ and a public transport schedules widget which shows me when is the next subway/t
 * [Google Calendar API](https://developers.google.com/calendar/api/guides/overview)
 * [Qt for Python](https://doc.qt.io/qtforpython-6.2/api.html)
 * [All C++ QT classes](https://doc.qt.io/qt-6/classes.html)
+* [Weather forecast API explorer](https://www.weatherapi.com/api-explorer.aspx#forecast)
