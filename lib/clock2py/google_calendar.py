@@ -3,18 +3,18 @@ import sys
 from pathlib import Path
 from typing import Union
 from collections import defaultdict
-from functools import lru_cache
 from cachetools import cached, TTLCache
-from  dataclasses import dataclass
 import datetime as dt
 import logging
-
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+from clock2py.helpers.date_helper import parse_time, get_tz_offset, subset
+from clock2py.google_event import GoogleEvent
 
 # If modifying these scopes, delete the file credentials.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
@@ -126,85 +126,28 @@ class GoogleCalendar:
             result = {}
             result = defaultdict(list)
             for event in events:
+
                 event_start = event["start"].get("dateTime", event["start"].get("date"))
-                event_start = parse_time(event_start)
+                # event_start = parse_time(event_start)
                 event_end = event["end"].get("dateTime", event["end"].get("date"))
-                event_end = parse_time(event_end)
+                # event_end = parse_time(event_end)
+                google_event = GoogleEvent(
+                    start=event_start,
+                    end=event_end,
+                    summary=event.get("summary", ""),
+                    description=event.get("description", ""),
+                    created=event.get("created"),
+                    updated=event.get("updated")
+                )
                 for date_ in subset(start_date=event_start, end_date=event_end):
-                    log.info(f"{date_}: {event['summary']}")
-                    result[date_].append(event["summary"])
+                    log.info(f"{date_}: {google_event.summary}")
+                    # result[date_].append(event["summary"])
+                    result[date_].append(google_event)
+
             return result
 
         except HttpError as error:
             log.error(f"An error occurred: {error}")
-
-
-@dataclass
-class GoogleEvent:
-
-    created: dt.datetime
-    updated: dt.datetime
-    start: dt.datetime
-    end: dt.datetime
-    duration: dt.timedelta
-    summary: str
-    description: str
-
-    def __init__(self, start, end, summary, description):
-        self.start = parse_time(start)
-        self.end = parse_time(end)
-        self.summary = summary
-        self.description = description
-        raise NotImplementedError
-
-
-def subset(start_date, end_date):
-    start_date = parse_time(start_date)
-    end_date = parse_time(end_date)
-    duration = max(1, (end_date - start_date).days)
-    for i in range(duration):
-        yield start_date + datetime.timedelta(days=i)
-
-
-def parse_time(time_expr: str) -> datetime.datetime:
-    if not time_expr:
-        raise RuntimeError("Time expression should be provided")
-    if isinstance(time_expr, datetime.datetime):
-        return time_expr
-    if isinstance(time_expr, datetime.date):
-        return datetime.datetime(
-            time_expr.year, time_expr.month, time_expr.day, 0, 0, 0
-        )
-    if not isinstance(time_expr, str):
-        return time_expr
-
-    formats = ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S%z")
-    for fmt in formats:
-        try:
-            if fmt == "%Y-%m-%dT%H:%M:%S%z":
-                dt_part, tz_info = time_expr.split("+")
-                tz_info = tz_info.replace(":", "")
-                time_expr = f"{dt_part}+{tz_info}"
-            time_expr = dt.datetime.strptime(time_expr, fmt)
-        except ValueError:
-            continue
-        else:
-            return time_expr
-    raise ValueError("Wrong date format")
-
-
-def get_tz_offset(date_time: dt.datetime):
-
-    tz_info = date_time.tzinfo if date_time.tzinfo else date_time.astimezone().tzinfo
-
-
-    delta = tz_info.utcoffset(date_time)
-
-    delta = int(delta.seconds) + int(delta.days) * 24 * 3600
-    delta_h = delta // 3600
-    sign = "+" if delta_h >= 0 else "-"
-    delta_m = delta % 3600 // 60
-    return f"{sign}{str(abs(delta_h)).zfill(2)}:{str(delta_m).zfill(2)}"
 
 
 def main():
@@ -215,7 +158,7 @@ def main():
     calendar = GoogleCalendar()
     # calendar.get_events()
     # calendar.get_events_this_month()
-    calendar.get_event_for_day("2023-12-24")
+    calendar.get_event_for_day("2023-12-29")
     # calendar.get_events_for_month(2023, 12)
 
 

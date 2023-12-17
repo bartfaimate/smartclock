@@ -20,11 +20,12 @@ from PySide2.QtWidgets import (
     QHBoxLayout,
     QSplitter,
     QListWidget,
-QScrollArea,
+    QScrollArea,
     QGraphicsWidget,
 )
 
 from clock2py.google_calendar import GoogleCalendar
+from clock2py.google_event import GoogleEvent
 
 COLORS = {
     "EVENT": {
@@ -78,25 +79,54 @@ class DayWidget(QWidget):
         12: "pm 12"
     })
 
-    def __init__(self, parent, hour_format:HourFormat = HourFormat.FORMAT_24H) -> None:
+    def __init__(self, parent, date: QDate, hour_format:HourFormat = HourFormat.FORMAT_24H) -> None:
         self.parent = parent
+        self.date = date
         super(DayWidget, self).__init__(parent)
         self.setGeometry(parent.geometry())
         self.blockheight = 40
         self.hour_format = HourFormat.FORMAT_AM_PM
+
+        self.google_calendar = GoogleCalendar()
+        self.google_events = self.getGoogleEventsForDate()
+
+    def hourPos(self, hour: int):
+        return self.blockheight * (hour)
 
     def setHourFormat(self, hour_format: HourFormat):
         self.hour_format = hour_format
 
     # def addGEvent(self, ):
     def paintEvent(self, event: QPaintEvent) -> None:
-       self.paintDay()
+        self.paintDay()
+        self.paintGoogleEvents()
+        self.drawRect(5, 10)
 
     def calculateBlockHeight(self):
         self.blockheight = 40 if self.parent.height() < 24 * 40 else self.parent.height() / 24
 
-    def addGoogleEvent(self, start_date, duration):
-        raise NotImplementedError
+    def getGoogleEventsForDate(self):
+        date = self.date.toPython()
+        self.google_events = self.google_calendar.get_event_for_day(date)
+
+    # def addGoogleEvent(self, google_event: GoogleEvent):
+    #     raise NotImplementedError
+
+    def paintGoogleEvents(self):
+        pass
+
+    def drawRect(self, start, end):
+        self.calculateBlockHeight()
+
+        painter = QPainter(self)
+
+        pen = QPen()
+        pen.setColor(Qt.green)
+        painter.setPen(Qt.green)
+        height = (end-start) * self.blockheight
+        rect = QRect(100, self.hourPos(start), self.width()-200, height)
+        painter.drawRect(rect)
+
 
     def paintDay(self):
         self.calculateBlockHeight()
@@ -119,7 +149,7 @@ class DayWidget(QWidget):
             line = QLine(0, y1, self.width(), y2)
             formatted_time = f"{str(hour).zfill(2)}:00" if self.hour_format == HourFormat.FORMAT_24H else f"{self.FORMAT_MAP[hour]}:00"
 
-            painter.drawText(0, y1, formatted_time)
+            painter.drawText(0, y1-self.blockheight+self.fontsize, formatted_time)
 
             painter.drawLine(line)
 
@@ -233,7 +263,7 @@ class Window(QWidget):
 
         layout = QHBoxLayout()
         scrollarea = QScrollArea()
-        calendar = DayWidget(parent=self)
+        calendar = DayWidget(parent=self, date=QDate(2023,12,29))
         scrollarea.setWidget(calendar)
 
         layout.addWidget(scrollarea)
