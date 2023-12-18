@@ -68,7 +68,7 @@ class GoogleCalendar:
 
     # @lru_cache(maxsize=128)
     @cached(TTLCache(128, ttl=timeout))
-    def get_events_for_month(self, year: int, month: int):
+    def get_events_for_month(self, year: int, month: int) -> dict[list[GoogleEvent]]:
         begin = datetime.datetime(year=year, month=month, day=1) - datetime.timedelta(
             days=5
         )
@@ -76,7 +76,7 @@ class GoogleCalendar:
 
         return self.get_events(max_results=500, begin=begin, end=end)
 
-    def get_events_this_month(self):
+    def get_events_this_month(self) -> dict[list[GoogleEvent]] :
         begin = datetime.datetime.now() - dt.timedelta(days=30)
         end = datetime.datetime.now() + dt.timedelta(days=30)
 
@@ -84,14 +84,14 @@ class GoogleCalendar:
 
     # @lru_cache(maxsize=128)
     @cached(TTLCache(128, ttl=timeout))
-    def get_event_for_day(self, date: Union[str, datetime.datetime]):
+    def get_event_for_day(self, date: Union[str, datetime.datetime]) -> list[GoogleEvent]:
         begin = parse_time(date)
         end = begin + dt.timedelta(minutes=24*60-1)
-        return self.get_events(max_results=50, begin=begin, end=end)
+        return self.get_events(max_results=50, begin=begin, end=end).get(parse_time(date), [])
 
     # @lru_cache(maxsize=128)
     @cached(TTLCache(128, ttl=timeout))
-    def get_events(self, max_results: int = 100, begin=None, end=None):
+    def get_events(self, max_results: int = 100, begin=None, end=None) -> dict[list[GoogleEvent]]:
         if not begin or not end:
             now = datetime.datetime.now()
             begin = begin or now

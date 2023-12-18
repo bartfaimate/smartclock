@@ -3,6 +3,17 @@ import datetime as dt
 from typing import  Union
 
 
+def do_ranges_overlap(start1: dt.datetime, end1: dt.datetime, start2: dt.datetime, end2: dt.datetime):
+
+    # Check if one range is entirely before the other
+    if end1 <= start2 or end2 < start1:
+        return False
+    else:
+        return True
+
+
+
+
 def subset(start_date, end_date):
     start_date = parse_time(start_date)
     end_date = parse_time(end_date)

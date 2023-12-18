@@ -12,7 +12,7 @@ from PySide2.QtCore import (
     QLine,
     QEvent,
 )
-from PySide2.QtGui import QColor, QPainter, QMouseEvent, QPen, QFont, QPaintEvent
+from PySide2.QtGui import QColor, QPainter, QMouseEvent, QPen, QFont, QPaintEvent, QPainterPath
 from PySide2.QtWidgets import (
     QWidget,
     QApplication,
@@ -40,7 +40,9 @@ class Calendar2Widget(QSplitter):
         super(Calendar2Widget, self).__init__()
 
         self.calendar = CalendarWidget()
-        self.day_widget = QListWidget()
+        # self.day_widget = QListWidget()
+        today = datetime.datetime.today()
+        self.day_widget = DayWidget(parent=self, date=QDate(today))
         self.addWidget(self.calendar)
         self.addWidget(self.day_widget)
         self.calendar.clicked.connect(self.handleClicked)
@@ -53,17 +55,17 @@ class Calendar2Widget(QSplitter):
         print("cal release")
         return super().mouseReleaseEvent(event)
 
-
     @Slot(QDate)
     def handleClicked(self, date: QCalendarWidget):
-        self.day_widget.clear()
-
-        events = self.calendar.get_events_for_day(date)
-
-        for timestamp, summary in events.items():
-            timestamp: datetime.datetime
-            item = f"{timestamp.time()} {summary}"
-            self.day_widget.addItem(str(item))
+        self.day_widget.setDate(date)
+        # self.day_widget.clear()
+        #
+        # events = self.calendar.get_events_for_day(date)
+        #
+        # for timestamp, google_event in events.items():
+        #     timestamp: datetime.datetime
+        #     item = f"{timestamp.time()} {google_event[0].summary}"
+        #     self.day_widget.addItem(str(item))
 
 
 class HourFormat(Enum):
@@ -73,8 +75,8 @@ class HourFormat(Enum):
 
 class DayWidget(QWidget):
 
-    FORMAT_MAP = {i : f"am {str(i % 12 ).zfill(2)}"  if i < 12 else f"pm {str(i % 12 ).zfill(2)}" for i in range(0, 24)}
-    FORMAT_MAP.update( {
+    FORMAT_MAP = {i : f"am {str(i % 12 ).zfill(2)}" if i < 12 else f"pm {str(i % 12 ).zfill(2)}" for i in range(0, 24)}
+    FORMAT_MAP.update({
         0: "am 12",
         12: "pm 12"
     })
@@ -90,17 +92,21 @@ class DayWidget(QWidget):
         self.google_calendar = GoogleCalendar()
         self.google_events = self.getGoogleEventsForDate()
 
+    def setDate(self, date: QDate):
+        self.date = date
+        self.google_events = self.getGoogleEventsForDate()
+        self.update()
+
     def hourPos(self, hour: int):
-        return self.blockheight * (hour)
+        return self.blockheight * hour
 
     def setHourFormat(self, hour_format: HourFormat):
         self.hour_format = hour_format
 
-    # def addGEvent(self, ):
     def paintEvent(self, event: QPaintEvent) -> None:
         self.paintDay()
         self.paintGoogleEvents()
-        self.drawRect(5, 10)
+        # self.drawRect(0, 24)
 
     def calculateBlockHeight(self):
         self.blockheight = 40 if self.parent.height() < 24 * 40 else self.parent.height() / 24
@@ -108,25 +114,37 @@ class DayWidget(QWidget):
     def getGoogleEventsForDate(self):
         date = self.date.toPython()
         self.google_events = self.google_calendar.get_event_for_day(date)
+        return self.google_events
 
     # def addGoogleEvent(self, google_event: GoogleEvent):
     #     raise NotImplementedError
 
     def paintGoogleEvents(self):
-        pass
+        for event in self.google_events:
+            event: GoogleEvent
+            end = event.end.hour if event.start.date() == event.end.date() else 24
 
-    def drawRect(self, start, end):
+            self.drawRect(event.start.hour, end, event.summary)
+
+    def drawRect(self, start, end, summary = "", color=Qt.blue):
         self.calculateBlockHeight()
 
         painter = QPainter(self)
 
         pen = QPen()
-        pen.setColor(Qt.green)
-        painter.setPen(Qt.green)
+        pen.setColor(color)
+        painter.setPen(color)
         height = (end-start) * self.blockheight
         rect = QRect(100, self.hourPos(start), self.width()-200, height)
-        painter.drawRect(rect)
+        rect_center = QPoint(100 + rect.width()/2, self.hourPos(start) + height/2)
+        # painter.drawRect(rect)
+        path = QPainterPath()
+        path.addRoundRect(rect, 10)
+        painter.fillPath(path, color)
 
+        pen.setColor(Qt.black)
+        painter.setPen(Qt.black)
+        painter.drawText(rect_center, summary)
 
     def paintDay(self):
         self.calculateBlockHeight()

@@ -7,7 +7,7 @@ import pytz
 
 sys.path.append(Path(__file__).parents[1].joinpath("lib").as_posix())
 
-from clock2py.helpers.date_helper import parse_time, get_tz_offset
+from clock2py.helpers.date_helper import parse_time, get_tz_offset, do_ranges_overlap
 
 
 class TestDateHelpers(unittest.TestCase):
@@ -43,6 +43,40 @@ class TestDateHelpers(unittest.TestCase):
 
         dtime = dt.datetime(2023, 12, 1, 12, 10, 0, tzinfo=dt.timezone(dt.timedelta(seconds=-7200)))
         self.assertEqual(get_tz_offset(dtime), "-02:00")
+
+    def test_do_ranges_overlap(self):
+        start1 = dt.datetime(2023, 12, 1, 12, 0, 0)
+        end1 = dt.datetime(2023, 12, 1, 12, 30, 0)
+
+        start2 = dt.datetime(2023, 12, 1, 12, 15, 0)
+        end2 = dt.datetime(2023, 12, 1, 12, 30, 0)
+
+        self.assertTrue(do_ranges_overlap(start1, end1, start2, end2))
+
+        start1 = dt.datetime(2023, 12, 1, 12, 0, 0)
+        end1 = dt.datetime(2023, 12, 1, 12, 30, 0)
+
+        start2 = dt.datetime(2023, 12, 1, 12, 30, 0)
+        end2 = dt.datetime(2023, 12, 1, 12, 40, 0)
+
+        self.assertFalse(do_ranges_overlap(start1, end1, start2, end2))
+
+
+        start1 = dt.datetime(2023, 12, 1, 12, 0, 0)
+        end1 = dt.datetime(2023, 12, 1, 12, 30, 0)
+
+        start2 = dt.datetime(2023, 12, 1, 13, 30, 0)
+        end2 = dt.datetime(2023, 12, 1, 13, 40, 0)
+
+        self.assertFalse(do_ranges_overlap(start1, end1, start2, end2))
+
+        start1 = dt.datetime(2023, 12, 1, 12, 0, 0)
+        end1 = dt.datetime(2023, 12, 1, 12, 30, 0)
+
+        start2 = dt.datetime(2023, 12, 1, 11, 30, 0)
+        end2 = dt.datetime(2023, 12, 1, 13, 40, 0)
+
+        self.assertTrue(do_ranges_overlap(start1, end1, start2, end2))
 
 
 
