@@ -1,12 +1,13 @@
+import asyncio
 import datetime
 import sys
+import time
 from pathlib import Path
 from typing import Union
 from collections import defaultdict
 from cachetools import cached, TTLCache
 import datetime as dt
 import logging
-import time
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -46,7 +47,7 @@ class GoogleCalendar:
         # The file credentials.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        
+
         if self.token_file.exists():
             creds = Credentials.from_authorized_user_file(self.token_file.as_posix(), SCOPES)
         # If there are no (valid) credentials available, let the user log in.
@@ -69,30 +70,31 @@ class GoogleCalendar:
 
     # @lru_cache(maxsize=128)
     @cached(TTLCache(128, ttl=timeout))
-    def get_events_for_month(self, year: int, month: int) -> dict[list[GoogleEvent]]:
+    async def get_events_for_month(self, year: int, month: int) -> dict[list[GoogleEvent]]:
         begin = datetime.datetime(year=year, month=month, day=1) - datetime.timedelta(
             days=5
         )
         end = begin + datetime.timedelta(days=40)
 
-        return self.get_events(max_results=500, begin=begin, end=end)
+        return await self.get_events(max_results=500, begin=begin, end=end)
 
-    def get_events_this_month(self) -> dict[list[GoogleEvent]] :
+    async def get_events_this_month(self) -> dict[list[GoogleEvent]] :
         begin = datetime.datetime.now() - dt.timedelta(days=30)
         end = datetime.datetime.now() + dt.timedelta(days=30)
 
-        return self.get_events(max_results=500, begin=begin, end=end)
+        return await self.get_events(max_results=500, begin=begin, end=end)
 
     # @lru_cache(maxsize=128)
     @cached(TTLCache(128, ttl=timeout))
-    def get_event_for_day(self, date: Union[str, datetime.datetime]) -> list[GoogleEvent]:
+    async def get_event_for_day(self, date: Union[str, datetime.datetime]) -> list[GoogleEvent]:
         begin = parse_time(date)
         end = begin + dt.timedelta(minutes=24*60-1)
-        return self.get_events(max_results=50, begin=begin, end=end).get(parse_time(date), [])
+        event = await self.get_events(max_results=50, begin=begin, end=end)
+        return event.get(parse_time(date), [])
 
     # @lru_cache(maxsize=128)
     @cached(TTLCache(128, ttl=timeout))
-    def get_events(self, max_results: int = 100, begin=None, end=None) -> dict[list[GoogleEvent]]:
+    async def get_events(self, max_results: int = 100, begin=None, end=None) -> dict[list[GoogleEvent]]:
         if not begin or not end:
             now = datetime.datetime.now()
             begin = begin or now
@@ -151,7 +153,7 @@ class GoogleCalendar:
             log.error(f"An error occurred: {error}")
 
 
-def main():
+async def main():
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
@@ -159,22 +161,21 @@ def main():
     calendar = GoogleCalendar()
     # calendar.get_events()
     # calendar.get_events_this_month()
-    print(f"start at {time.strftime('%X')}")
+    print("getting data")
+    print(f"started at {time.strftime('%X')}")
 
-    calendar.get_event_for_day("2023-12-29")
-    print()
-    calendar.get_event_for_day("2023-12-25")
-    print()
+    task = asyncio.create_task(calendar.get_event_for_day("2023-12-29"))
+    task1 = asyncio.create_task(calendar.get_event_for_day("2023-12-25"))
+    task2 = asyncio.create_task(calendar.get_event_for_day("2023-12-31"))
 
-    calendar.get_event_for_day("2023-12-31")
-    print()
-
-    calendar.get_events_for_month(2023, 12)
-
+    print("dddd")
+    # calendar.get_events_for_month(2023, 12)
+    await task
+    await task1
+    await task2
     print(f"ended at {time.strftime('%X')}")
 
-    # calendar.get_events_for_month(2023, 12)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

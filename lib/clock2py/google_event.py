@@ -1,7 +1,7 @@
 import datetime as dt
 from typing import  Union
 from dataclasses import dataclass
-import  logging
+import logging
 import sys
 
 from clock2py.helpers.date_helper import parse_time

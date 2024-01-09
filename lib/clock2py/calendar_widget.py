@@ -1,6 +1,7 @@
 import datetime
 import sys
-from enum import  Enum
+
+import PySide2
 from PySide2.QtCore import (
     QLocale,
     Qt,
@@ -35,149 +36,19 @@ COLORS = {
 }
 
 
-class Calendar2Widget(QSplitter):
-    def __init__(self):
-        super(Calendar2Widget, self).__init__()
-
-        self.calendar = CalendarWidget()
-        # self.day_widget = QListWidget()
-        today = datetime.datetime.today()
-        self.day_widget = DayWidget(parent=self, date=QDate(today))
-        self.addWidget(self.calendar)
-        self.addWidget(self.day_widget)
-        self.calendar.clicked.connect(self.handleClicked)
-
-    def mousePressEvent(self, event: QMouseEvent) -> None:
-        print("cal press")
-        return super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        print("cal release")
-        return super().mouseReleaseEvent(event)
-
-    @Slot(QDate)
-    def handleClicked(self, date: QCalendarWidget):
-        self.day_widget.setDate(date)
-        # self.day_widget.clear()
-        #
-        # events = self.calendar.get_events_for_day(date)
-        #
-        # for timestamp, google_event in events.items():
-        #     timestamp: datetime.datetime
-        #     item = f"{timestamp.time()} {google_event[0].summary}"
-        #     self.day_widget.addItem(str(item))
-
-
-class HourFormat(Enum):
-    FORMAT_AM_PM = 1
-    FORMAT_24H = 2
-
-
-class DayWidget(QWidget):
-
-    FORMAT_MAP = {i : f"am {str(i % 12 ).zfill(2)}" if i < 12 else f"pm {str(i % 12 ).zfill(2)}" for i in range(0, 24)}
-    FORMAT_MAP.update({
-        0: "am 12",
-        12: "pm 12"
-    })
-
-    def __init__(self, parent, date: QDate, hour_format:HourFormat = HourFormat.FORMAT_24H) -> None:
-        self.parent = parent
-        self.date = date
-        super(DayWidget, self).__init__(parent)
-        self.setGeometry(parent.geometry())
-        self.blockheight = 40
-        self.hour_format = HourFormat.FORMAT_AM_PM
-
-        self.google_calendar = GoogleCalendar()
-        self.google_events = self.getGoogleEventsForDate()
-
-    def setDate(self, date: QDate):
-        self.date = date
-        self.google_events = self.getGoogleEventsForDate()
-        self.update()
-
-    def hourPos(self, hour: int):
-        return self.blockheight * hour
-
-    def setHourFormat(self, hour_format: HourFormat):
-        self.hour_format = hour_format
-
-    def paintEvent(self, event: QPaintEvent) -> None:
-        self.paintDay()
-        self.paintGoogleEvents()
-        # self.drawRect(0, 24)
-
-    def calculateBlockHeight(self):
-        self.blockheight = 40 if self.parent.height() < 24 * 40 else self.parent.height() / 24
-
-    def getGoogleEventsForDate(self):
-        date = self.date.toPython()
-        self.google_events = self.google_calendar.get_event_for_day(date)
-        return self.google_events
-
-    # def addGoogleEvent(self, google_event: GoogleEvent):
-    #     raise NotImplementedError
-
-    def paintGoogleEvents(self):
-        for event in self.google_events:
-            event: GoogleEvent
-            end = event.end.hour if event.start.date() == event.end.date() else 24
-
-            self.drawRect(event.start.hour, end, event.summary)
-
-    def drawRect(self, start, end, summary = "", color=Qt.blue):
-        self.calculateBlockHeight()
-
-        painter = QPainter(self)
-
-        pen = QPen()
-        pen.setColor(color)
-        painter.setPen(color)
-        height = (end-start) * self.blockheight
-        rect = QRect(100, self.hourPos(start), self.width()-200, height)
-        rect_center = QPoint(100 + rect.width()/2, self.hourPos(start) + height/2)
-        # painter.drawRect(rect)
-        path = QPainterPath()
-        path.addRoundRect(rect, 10)
-        painter.fillPath(path, color)
-
-        pen.setColor(Qt.black)
-        painter.setPen(Qt.black)
-        painter.drawText(rect_center, summary)
-
-    def paintDay(self):
-        self.calculateBlockHeight()
-        self.fontsize = 20
-        painter = QPainter(self)
-
-        pen = QPen()
-        pen.setColor(Qt.green)
-        painter.setPen(Qt.black)
-        # painter.setFont(QFont("Arial", min(self.height(), self.width()) - 60))
-        font = QFont("Helvetica")
-        font.setPixelSize(self.fontsize)
-        painter.setFont(font)
-
-        self.setFixedHeight(24 * self.blockheight)
-
-        for i in range(1, 25):
-            hour = i - 1
-            y1, y2 = i * self.blockheight,   i * self.blockheight
-            line = QLine(0, y1, self.width(), y2)
-            formatted_time = f"{str(hour).zfill(2)}:00" if self.hour_format == HourFormat.FORMAT_24H else f"{self.FORMAT_MAP[hour]}:00"
-
-            painter.drawText(0, y1-self.blockheight+self.fontsize, formatted_time)
-
-            painter.drawLine(line)
-
-
 class CalendarWidget(QCalendarWidget):
-    def __init__(self):
+    def __init__(self, parent=None):
+
         super(CalendarWidget, self).__init__()
+
+        self.parent = parent
+        if self.parent:
+            self.setGeometry(parent.geometry())
+
         self.setNavigationBarVisible(True)
         self.setLocale(QLocale.English)
         self.setFirstDayOfWeek(Qt.DayOfWeek.Monday)
+
         self.google_calendar = self.init_calendar()
         super(CalendarWidget, self).clicked.connect(self.handleClicked)
         super(CalendarWidget, self).currentPageChanged.connect(
@@ -206,7 +77,7 @@ class CalendarWidget(QCalendarWidget):
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         print("cal release")
         return super().mouseReleaseEvent(event)
-    
+
     def paintCell(self, painter: QPainter, rect: QRect, date: QDate) -> None:
         super(CalendarWidget, self).paintCell(painter, rect, date)
         today = QDate().currentDate()
@@ -261,14 +132,6 @@ class CalendarWidget(QCalendarWidget):
         # print(event.type())
         return super().event(event)
 
-    def mousePressEvent(self, event: QMouseEvent) -> None:
-        print("cal press")
-        return super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        print("cal release")
-        return super().mouseReleaseEvent(event)
-
 
 class Window(QWidget):
 
@@ -280,11 +143,9 @@ class Window(QWidget):
         self.setGeometry(100, 100, 840, 480)
 
         layout = QHBoxLayout()
-        scrollarea = QScrollArea()
-        calendar = DayWidget(parent=self, date=QDate(2023,12,29))
-        scrollarea.setWidget(calendar)
+        calendar = CalendarWidget()
 
-        layout.addWidget(scrollarea)
+        layout.addWidget(calendar)
         self.setLayout(layout)
 
         self.show()
@@ -292,7 +153,6 @@ class Window(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # clock = FlipClock()
     window = Window()
 
     sys.exit(app.exec_())

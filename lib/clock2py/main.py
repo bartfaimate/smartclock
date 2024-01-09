@@ -2,7 +2,7 @@ from PySide2.QtWidgets import QWidget, QApplication, QHBoxLayout, QStackedWidget
 
 import sys
 
-from calendar_widget import CalendarWidget
+from calendar_with_day_widget import CalendarWidget
 from clock_widget import ClockWidget
 
 

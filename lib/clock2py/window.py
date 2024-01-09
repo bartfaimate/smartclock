@@ -10,7 +10,7 @@ from PySide2.QtWidgets import (
 from PySide2.QtCore import QEvent, Qt, QPoint
 from PySide2.QtGui import QMouseEvent
 
-from clock2py.calendar_widget import Calendar2Widget
+from clock2py.calendar_with_day_widget import CalendarWithDayWidget
 from clock2py.clock_widget import ClockWidget
 
 
@@ -28,7 +28,7 @@ class Window(QWidget):
         self.resize(840, 480)
         # self.windowType()
         layout = QHBoxLayout(self)
-        calendar = Calendar2Widget()
+        calendar = CalendarWithDayWidget(parent=self)
         clock = ClockWidget(parent=self)
 
         self.stacked_widget = QStackedLayout(self)
