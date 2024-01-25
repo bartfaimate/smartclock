@@ -31,8 +31,8 @@ class GoogleCalendar:
     timeout = 900
 
     def __init__(self) -> None:
-        self.token_file = Path(__file__).parent.joinpath("token.json").resolve()
-        self.credentials_file = Path(__file__).parent.joinpath("credentials.json").resolve()
+        self.token_file = Path(__file__).parent.joinpath("resources/token.json").resolve()
+        self.credentials_file = Path(__file__).parent.joinpath("resources/credentials.json").resolve()
         try:
             self.creds = self.authenticate()
         except RuntimeError as e:
