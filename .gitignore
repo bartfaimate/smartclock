@@ -162,3 +162,5 @@ clock2.py/token.json
 clock2.py/credentials.json
 lib/clock2py/credentials.json
 lib/clock2py/token.json
+.secrets.env
+lib/clock2py/resources/token.json

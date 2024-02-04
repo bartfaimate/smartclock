@@ -5,6 +5,18 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[jsonc]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./lib"
+    ]
 }
