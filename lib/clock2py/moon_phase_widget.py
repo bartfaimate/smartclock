@@ -13,7 +13,7 @@ from PySide2.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout
 from PySide2.QtSvg import QSvgWidget
 
 
-sys.path.append(Path(__file__).parents[1].joinpath("lib").as_posix())
+sys.path.append(Path(__file__).parents[2].joinpath("lib").as_posix())
 
 from moonapi.moon_phase import MoonPhaseApi
 from moonapi.exceptions import MoonPhaseApiError
@@ -54,29 +54,6 @@ class MoonPhaseWidget(QSvgWidget):
         APP_ID = os.getenv("APPLICATION_ID")
         APP_SECRET = os.getenv("APPLICATION_SECRET")
         return MoonPhaseApi(APP_ID, APP_SECRET)
-
-
-    # def paintEvent(self, event: QPaintEvent) -> None:
-    #     self.paintMoonPhase()
-
-   
-
-    # def paintMoonPhase(self):
-    #     painter = QPainter(self)
-
-    #     pen = QPen()
-    #     pen.setColor(Qt.green)
-    #     painter.setPen(Qt.black)
-    #     # painter.setFont(QFont("Arial", min(self.height(), self.width()) - 60))
-    #     font = QFont("Helvetica")
-    #     font.setPixelSize(self.fontsize)
-    #     painter.setFont(font)
-
-
-    
-    # def event(self, event: QEvent) -> bool:
-    #     # print(event.type())
-    #     return super().event(event)
     
     # @Slot()
     # def handleTimeout(self):

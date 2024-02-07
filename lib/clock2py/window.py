@@ -1,3 +1,6 @@
+import logging
+import sys
+
 from PySide2.QtWidgets import (
     QWidget,
     QApplication,
@@ -12,6 +15,12 @@ from PySide2.QtGui import QMouseEvent
 
 from clock2py.calendar_with_day_widget import CalendarWithDayWidget
 from clock2py.clock_widget import ClockWidget
+from clock2py.moon_phase_widget import MoonPhaseWidget
+
+
+log = logging.getLogger("window")
+log.setLevel(logging.DEBUG)
+logging.basicConfig(stream=sys.stdout)
 
 
 class Window(QWidget):
@@ -19,49 +28,56 @@ class Window(QWidget):
         super(Window, self).__init__()
         self.setWindowFlags(
             Qt.Window
-            | Qt.FramelessWindowHint
-            | Qt.WindowSystemMenuHint
-            | Qt.WindowMinimizeButtonHint
-            | Qt.WindowMaximizeButtonHint
-            | Qt.WindowCloseButtonHint
+            # | Qt.FramelessWindowHint
+            # | Qt.WindowSystemMenuHint
+            # | Qt.WindowMinimizeButtonHint
+            # | Qt.WindowMaximizeButtonHint
+            # | Qt.WindowCloseButtonHint
         )
         self.resize(840, 480)
         # self.windowType()
         layout = QHBoxLayout(self)
-        calendar = CalendarWithDayWidget(parent=self)
-        clock = ClockWidget(parent=self)
-
+        
         self.stacked_widget = QStackedLayout(self)
-        self.stacked_widget.addWidget(clock)
-        self.stacked_widget.addWidget(calendar)
+        widgets = self.init_widgets()
+        if not widgets:
+            raise RuntimeError("No widgets could be initialised... Shutting down")
+        for widget in widgets:
+            self.stacked_widget.addWidget(widget)
+      
+
         self.index = self.stacked_widget.currentIndex()
         layout.addLayout(self.stacked_widget)
         self.setLayout(layout)
 
         self.swipe = 0, 0
 
-    # def event(self, event: QEvent) -> bool:
-    #     print(event.type())
-    #     return super().event(event)
+    def init_widgets(self):
+        widgetst_to_init = {
+            "clock": ClockWidget,
+            "calendar": CalendarWithDayWidget,
+            "moon_widget": MoonPhaseWidget,
 
-    # def event(self, event: QEvent):
-    #     if event.type() == QEvent.Gesture:
-    #         print("gesture")
-    #     if event.type() == QEvent.MouseButtonPress:
-    #         print("press")
-    #         return self.handleswipe(event)
-    #     if event.type() == QEvent.DragMove:
-    #         print("drag")
-
-    #     return True
+        }
+        widgets = []
+        for name, widget_class in widgetst_to_init.items():
+            try:
+                log.info(f"Initialise {name}...")
+                widget = widget_class(parent=self)
+            except:
+                log.warning(f"Could not initialise {name} widget")
+            else:
+                widgets.append(widget)
+        
+        return widgets
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        print("press")
+        # print("press")
         self.startPos = event.pos()
         return super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        print("release")
+        # print("release")
         self.endPos = event.pos()
         self.mov = self.endPos - self.startPos
         self.handleswipe(self.mov)
@@ -69,6 +85,8 @@ class Window(QWidget):
 
     def handleswipe(self, movement: QPoint):
         if movement.y() > 100:
+            return
+        if abs(movement.x()) < 50:
             return
         if abs(movement.x()) < abs(3 * movement.y()):
             return

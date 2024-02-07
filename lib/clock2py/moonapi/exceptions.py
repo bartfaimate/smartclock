@@ -1,4 +1,0 @@
-
-
-class MoonPhaseApiError(BaseException):
-    pass
